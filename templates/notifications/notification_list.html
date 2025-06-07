@@ -1,0 +1,291 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Notifications - Airport Management{% endblock %}
+
+{% block extra_css %}
+<style>
+    .notification-card {
+        transition: transform 0.2s;
+        border: none;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 1rem;
+        border-left: 4px solid #007bff;
+    }
+    .notification-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    .notification-card.unread {
+        background-color: #f8f9fa;
+        border-left-color: #dc3545;
+    }
+    .notification-card.read {
+        opacity: 0.8;
+        border-left-color: #6c757d;
+    }
+    .notification-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    .notification-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+    }
+    .notification-type-booking_confirmation { background-color: #28a745; }
+    .notification-type-flight_update { background-color: #007bff; }
+    .notification-type-check_in_reminder { background-color: #17a2b8; }
+    .notification-type-payment_confirmation { background-color: #ffc107; color: #000; }
+    .notification-type-boarding_call { background-color: #dc3545; }
+    .notification-type-gate_change { background-color: #fd7e14; }
+    .notification-type-general { background-color: #6c757d; }
+    .notification-meta {
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+    .no-notifications {
+        text-align: center;
+        padding: 3rem;
+        color: #6c757d;
+    }
+    .notification-actions {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="notification-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2 class="mb-1"><i class="fas fa-bell"></i> Notifications</h2>
+                        <p class="mb-0">Stay updated with your flight information and important announcements</p>
+                    </div>
+                    <div class="text-end">
+                        {% if unread_count > 0 %}
+                            <span class="badge bg-danger fs-6">{{ unread_count }} unread</span>
+                            <br>
+                            <button class="btn btn-light btn-sm mt-2" onclick="markAllAsRead()">
+                                <i class="fas fa-check-double"></i> Mark All Read
+                            </button>
+                        {% else %}
+                            <span class="badge bg-success fs-6">All caught up!</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notifications List -->
+    {% if notifications %}
+        <div class="row">
+            {% for notification in notifications %}
+            <div class="col-12 mb-3">
+                <div class="card notification-card {% if not notification.is_read %}unread{% else %}read{% endif %}">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-auto">
+                                <div class="notification-icon notification-type-{{ notification.notification_type }}">
+                                    {% if notification.notification_type == 'booking_confirmation' %}
+                                        <i class="fas fa-ticket-alt"></i>
+                                    {% elif notification.notification_type == 'flight_update' %}
+                                        <i class="fas fa-plane"></i>
+                                    {% elif notification.notification_type == 'check_in_reminder' %}
+                                        <i class="fas fa-check-circle"></i>
+                                    {% elif notification.notification_type == 'payment_confirmation' %}
+                                        <i class="fas fa-credit-card"></i>
+                                    {% elif notification.notification_type == 'boarding_call' %}
+                                        <i class="fas fa-bullhorn"></i>
+                                    {% elif notification.notification_type == 'gate_change' %}
+                                        <i class="fas fa-exchange-alt"></i>
+                                    {% else %}
+                                        <i class="fas fa-info-circle"></i>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h5 class="mb-1">
+                                        {{ notification.title }}
+                                        {% if not notification.is_read %}
+                                            <span class="badge bg-primary ms-2">New</span>
+                                        {% endif %}
+                                    </h5>
+                                    <div class="notification-actions">
+                                        {% if not notification.is_read %}
+                                            <button class="btn btn-sm btn-outline-primary" onclick="markAsRead({{ notification.id }})">
+                                                <i class="fas fa-check"></i> Mark Read
+                                            </button>
+                                        {% endif %}
+                                        <a href="{% url 'notifications:notification_detail' notification.pk %}" class="btn btn-sm btn-primary">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                    </div>
+                                </div>
+                                
+                                <p class="mb-2">{{ notification.message|truncatewords:20 }}</p>
+                                
+                                <div class="notification-meta">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <small>
+                                                <i class="fas fa-clock"></i> 
+                                                {{ notification.created_at|timesince }} ago
+                                            </small>
+                                        </div>
+                                        <div class="col-md-6 text-md-end">
+                                            <small>
+                                                <i class="fas fa-tag"></i> 
+                                                {{ notification.get_notification_type_display }}
+                                            </small>
+                                            {% if notification.booking %}
+                                                <br>
+                                                <small>
+                                                    <i class="fas fa-ticket-alt"></i> 
+                                                    Booking: {{ notification.booking.booking_reference }}
+                                                </small>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <div class="row">
+            <div class="col-12">
+                <nav aria-label="Notifications pagination">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1">First</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                            </li>
+                        {% endif %}
+
+                        <li class="page-item active">
+                            <span class="page-link">
+                                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                            </span>
+                        </li>
+
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        </div>
+        {% endif %}
+
+    {% else %}
+        <!-- No Notifications State -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body no-notifications">
+                        <i class="fas fa-bell-slash fa-4x mb-3"></i>
+                        <h4>No Notifications</h4>
+                        <p class="mb-4">You're all caught up! We'll notify you when there are updates about your flights or bookings.</p>
+                        <a href="{% url 'dashboard:home' %}" class="btn btn-primary">
+                            <i class="fas fa-home"></i> Back to Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function markAsRead(notificationId) {
+    fetch(`/notifications/${notificationId}/mark-read/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            location.reload();
+        } else {
+            alert('Error marking notification as read');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred');
+    });
+}
+
+function markAllAsRead() {
+    fetch('/notifications/mark-all-read/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            location.reload();
+        } else {
+            alert('Error marking all notifications as read');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred');
+    });
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}

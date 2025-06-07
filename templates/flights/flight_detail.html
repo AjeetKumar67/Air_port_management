@@ -1,0 +1,314 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ flight.flight_number }} - Flight Details{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-8">
+            <!-- Flight Information -->
+            <div class="card shadow-custom mb-4">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4>
+                            <i class="fas fa-plane"></i> {{ flight.flight_number }}
+                            <span class="flight-status status-{{ flight.status }} ms-2">
+                                {{ flight.get_status_display }}
+                            </span>
+                        </h4>
+                        <div>
+                            {% if flight.airline.logo %}
+                                <img src="{{ flight.airline.logo.url }}" alt="{{ flight.airline.name }}" width="40" height="40">
+                            {% endif %}
+                            <span class="ms-2">{{ flight.airline.name }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-5 text-center">
+                            <h2 class="text-primary">{{ flight.source }}</h2>
+                            <p class="mb-1">Departure</p>
+                            <h4>{{ flight.scheduled_departure|time:"H:i" }}</h4>
+                            <p class="text-muted">{{ flight.scheduled_departure|date:"F d, Y" }}</p>
+                            {% if flight.actual_departure %}
+                                <small class="text-success">
+                                    <i class="fas fa-check-circle"></i> Actual: {{ flight.actual_departure|time:"H:i" }}
+                                </small>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-2 text-center">
+                            <div class="py-4">
+                                <i class="fas fa-plane fa-2x text-primary"></i>
+                                <div class="border-top my-2"></div>
+                                <small class="text-muted">
+                                    {% if flight.aircraft %}
+                                        {{ flight.aircraft.aircraft_type }}
+                                    {% endif %}
+                                </small>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-5 text-center">
+                            <h2 class="text-primary">{{ flight.destination }}</h2>
+                            <p class="mb-1">Arrival</p>
+                            <h4>{{ flight.scheduled_arrival|time:"H:i" }}</h4>
+                            <p class="text-muted">{{ flight.scheduled_arrival|date:"F d, Y" }}</p>
+                            {% if flight.actual_arrival %}
+                                <small class="text-success">
+                                    <i class="fas fa-check-circle"></i> Actual: {{ flight.actual_arrival|time:"H:i" }}
+                                </small>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-info-circle"></i> Flight Information</h6>
+                            <table class="table table-sm">
+                                <tr>
+                                    <td><strong>Aircraft:</strong></td>
+                                    <td>{{ flight.aircraft.registration|default:"Not assigned" }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Gate:</strong></td>
+                                    <td>{{ flight.gate.gate_number|default:"Not assigned" }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Terminal:</strong></td>
+                                    <td>{{ flight.terminal.name|default:"Not assigned" }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Base Price:</strong></td>
+                                    <td>${{ flight.base_price }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-users"></i> Seat Availability</h6>
+                            <div class="progress mb-2">
+                                <div class="progress-bar bg-success" role="progressbar" 
+                                     style="width: {% widthratio booked_seats total_seats 100 %}%"
+                                     aria-valuenow="{{ booked_seats }}" aria-valuemin="0" aria-valuemax="{{ total_seats }}">
+                                </div>
+                            </div>
+                            <div class="row text-center">
+                                <div class="col-4">
+                                    <small class="text-muted">Total</small><br>
+                                    <strong>{{ total_seats }}</strong>
+                                </div>
+                                <div class="col-4">
+                                    <small class="text-muted">Booked</small><br>
+                                    <strong class="text-danger">{{ booked_seats }}</strong>
+                                </div>
+                                <div class="col-4">
+                                    <small class="text-muted">Available</small><br>
+                                    <strong class="text-success">{{ available_seats }}</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recent Bookings (for staff/admin) -->
+            {% if user.role in 'admin,staff,airline_staff' %}
+                <div class="card shadow-custom">
+                    <div class="card-header">
+                        <h6><i class="fas fa-ticket-alt"></i> Recent Bookings</h6>
+                    </div>
+                    <div class="card-body">
+                        {% if flight.bookings.all %}
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Passenger</th>
+                                            <th>Seat</th>
+                                            <th>Status</th>
+                                            <th>Booking Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for booking in flight.bookings.all|slice:":10" %}
+                                            <tr>
+                                                <td>{{ booking.passenger_name }}</td>
+                                                <td>{{ booking.seat_number|default:"Not assigned" }}</td>
+                                                <td>
+                                                    <span class="badge bg-{{ booking.status|yesno:'success,warning' }}">
+                                                        {{ booking.get_status_display }}
+                                                    </span>
+                                                </td>
+                                                <td>{{ booking.booking_date|date:"M d, Y" }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <p class="text-muted">No bookings yet.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        
+        <div class="col-md-4">
+            <!-- Booking Section -->
+            {% if user.is_authenticated and user.role == 'passenger' and can_book %}
+                <div class="card shadow-custom mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h6><i class="fas fa-ticket-alt"></i> Book This Flight</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center mb-3">
+                            <h3 class="text-primary">${{ flight.base_price }}</h3>
+                            <small class="text-muted">Base price per passenger</small>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <a href="{% url 'bookings:booking_create' flight.id %}" class="btn btn-primary btn-lg">
+                                <i class="fas fa-plane"></i> Book Now
+                            </a>
+                        </div>
+                        
+                        <div class="mt-3">
+                            <small class="text-muted">
+                                <i class="fas fa-info-circle"></i>
+                                Free cancellation up to 24 hours before departure
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            {% elif not user.is_authenticated %}
+                <div class="card shadow-custom mb-4">
+                    <div class="card-body text-center">
+                        <h6>Want to book this flight?</h6>
+                        <p class="text-muted mb-3">Please login or register to continue</p>
+                        <a href="{% url 'users:login' %}?next={% url 'flights:flight_detail' flight.id %}" class="btn btn-primary">
+                            Login to Book
+                        </a>
+                    </div>
+                </div>
+            {% elif not can_book %}
+                <div class="card shadow-custom mb-4">
+                    <div class="card-body text-center">
+                        <h6 class="text-muted">Booking Not Available</h6>
+                        <p class="text-muted">
+                            {% if available_seats == 0 %}
+                                This flight is fully booked.
+                            {% else %}
+                                This flight is not available for booking.
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            {% endif %}
+            
+            <!-- Flight Updates -->
+            <div class="card shadow-custom">
+                <div class="card-header">
+                    <h6><i class="fas fa-bell"></i> Flight Updates</h6>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-primary"></div>
+                            <div class="timeline-content">
+                                <h6 class="timeline-title">Flight Scheduled</h6>
+                                <p class="timeline-description">
+                                    Flight {{ flight.flight_number }} scheduled for {{ flight.scheduled_departure|date:"M d, Y" }}
+                                </p>
+                                <small class="text-muted">{{ flight.created_at|timesince }} ago</small>
+                            </div>
+                        </div>
+                        
+                        {% if flight.status == 'boarding' %}
+                            <div class="timeline-item">
+                                <div class="timeline-marker bg-success"></div>
+                                <div class="timeline-content">
+                                    <h6 class="timeline-title">Boarding Started</h6>
+                                    <p class="timeline-description">
+                                        Passengers can now board at Gate {{ flight.gate.gate_number }}
+                                    </p>
+                                    <small class="text-muted">Just now</small>
+                                </div>
+                            </div>
+                        {% elif flight.status == 'delayed' %}
+                            <div class="timeline-item">
+                                <div class="timeline-marker bg-warning"></div>
+                                <div class="timeline-content">
+                                    <h6 class="timeline-title">Flight Delayed</h6>
+                                    <p class="timeline-description">
+                                        Flight delayed. New departure time will be announced soon.
+                                    </p>
+                                    <small class="text-muted">{{ flight.updated_at|timesince }} ago</small>
+                                </div>
+                            </div>
+                        {% elif flight.status == 'landed' %}
+                            <div class="timeline-item">
+                                <div class="timeline-marker bg-success"></div>
+                                <div class="timeline-content">
+                                    <h6 class="timeline-title">Flight Landed</h6>
+                                    <p class="timeline-description">
+                                        Flight has safely landed at {{ flight.destination }}
+                                    </p>
+                                    <small class="text-muted">{{ flight.actual_arrival|timesince }} ago</small>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 10px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #dee2e6;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -25px;
+    top: 5px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid white;
+}
+
+.timeline-title {
+    font-size: 0.9rem;
+    margin-bottom: 5px;
+}
+
+.timeline-description {
+    font-size: 0.8rem;
+    color: #6c757d;
+    margin-bottom: 5px;
+}
+</style>
+{% endblock %}

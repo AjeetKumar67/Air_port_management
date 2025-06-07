@@ -1,0 +1,72 @@
+# Django Airport Management System Requirements
+
+# Core Django Framework
+Django==5.2.2
+
+# Database
+mysqlclient==2.2.7
+
+# Image Processing (for profile pictures, logos, etc.)
+Pillow==11.2.1
+
+# QR Code Generation (for boarding passes, tickets, etc.)
+qrcode==8.2
+
+# ASGI Server Support
+asgiref==3.8.1
+
+# SQL Parsing
+sqlparse==0.5.3
+
+# Type Extensions
+typing_extensions==4.14.0
+
+# Additional packages that might be useful for production
+# Uncomment and install as needed:
+
+# Production Server
+# gunicorn==21.2.0
+# uvicorn==0.23.2
+
+# Environment Variables Management
+# python-decouple==3.8
+
+# CORS Headers (if building API)
+# django-cors-headers==4.3.1
+
+# REST Framework (if building API)
+# djangorestframework==3.14.0
+
+# Admin Interface Enhancement
+# django-admin-interface==0.28.6
+
+# Email Backend
+# django-anymail==10.2
+
+# Caching
+# redis==5.0.1
+# django-redis==5.4.0
+
+# PDF Generation (for reports, tickets)
+# reportlab==4.0.7
+# weasyprint==60.2
+
+# Excel Export/Import
+# openpyxl==3.1.2
+# django-import-export==3.3.1
+
+# Security
+# django-security==0.17.0
+# django-ratelimit==4.1.0
+
+# Monitoring and Logging
+# sentry-sdk==1.38.0
+
+# Testing
+# pytest==7.4.3
+# pytest-django==4.7.0
+# coverage==7.3.2
+
+# Development Tools (for development environment)
+# django-debug-toolbar==4.2.0
+# django-extensions==3.2.3

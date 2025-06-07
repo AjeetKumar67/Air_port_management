@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Login - Airport Management System{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-custom">
+                <div class="card-header text-center">
+                    <h3><i class="fas fa-sign-in-alt"></i> Login</h3>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" id="login-form">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.email.id_for_label }}" class="form-label">
+                                <i class="fas fa-envelope"></i> Email Address
+                            </label>
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.email.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.password.id_for_label }}" class="form-label">
+                                <i class="fas fa-lock"></i> Password
+                            </label>
+                            {{ form.password }}
+                            {% if form.password.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.password.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="remember-me">
+                            <label class="form-check-label" for="remember-me">Remember me</label>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-sign-in-alt"></i> Login
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <div class="text-center mt-3">
+                        <p class="mb-0">Don't have an account? 
+                            <a href="{% url 'users:register' %}" class="text-primary">Register here</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Demo Login Cards -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <h5 class="text-center mb-3">Quick Demo Login</h5>
+                </div>
+                <div class="col-md-6 mb-2">
+                    <div class="card bg-light">
+                        <div class="card-body text-center py-2">
+                            <small class="text-muted">Admin</small><br>
+                            <code>admin@airport.com</code>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-2">
+                    <div class="card bg-light">
+                        <div class="card-body text-center py-2">
+                            <small class="text-muted">Passenger</small><br>
+                            <code>passenger@airport.com</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Demo login functionality
+    $('.card.bg-light').click(function() {
+        var email = $(this).find('code').text();
+        $('#id_email').val(email);
+        $('#id_password').val('password123');
+    });
+});
+</script>
+{% endblock %}

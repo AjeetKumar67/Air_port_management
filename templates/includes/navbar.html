@@ -1,0 +1,96 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand" href="{% url 'dashboard:home' %}">
+            <i class="fas fa-plane"></i> Airport Management
+        </a>
+        
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'dashboard:home' %}">
+                            <i class="fas fa-home"></i> Dashboard
+                        </a>
+                    </li>
+                    
+                    {% if user.role == 'passenger' %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'flights:flight_list' %}">
+                                <i class="fas fa-plane-departure"></i> Flights
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'bookings:booking_list' %}">
+                                <i class="fas fa-ticket-alt"></i> My Bookings
+                            </a>
+                        </li>
+                    {% endif %}
+                    
+                    {% if user.role == 'admin' or user.role == 'staff' %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-cogs"></i> Management
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{% url 'flights:flight_management' %}">Flights</a></li>
+                                <li><a class="dropdown-item" href="{% url 'flights:airline_list' %}">Airlines</a></li>
+                                <li><a class="dropdown-item" href="{% url 'flights:gate_list' %}">Gates</a></li>
+                                {% if user.role == 'admin' %}
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="{% url 'users:user_management' %}">Users</a></li>
+                                {% endif %}
+                            </ul>
+                        </li>
+                    {% endif %}
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'flights:flight_status' %}">
+                            <i class="fas fa-info-circle"></i> Flight Status
+                        </a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'notifications:notification_list' %}">
+                            <i class="fas fa-bell"></i> Notifications
+                            {% if user.unread_notifications_count > 0 %}
+                                <span class="badge bg-danger">{{ user.unread_notifications_count }}</span>
+                            {% endif %}
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'flights:flight_status' %}">
+                            <i class="fas fa-info-circle"></i> Flight Status
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+            
+            <ul class="navbar-nav">
+                {% if user.is_authenticated %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user"></i> {{ user.get_full_name|default:user.username }}
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'users:profile' %}">Profile</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'users:logout' %}">Logout</a></li>
+                        </ul>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'users:login' %}">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'users:register' %}">Register</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>

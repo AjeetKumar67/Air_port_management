@@ -1,0 +1,352 @@
+/* Custom CSS for Airport Management System */
+
+:root {
+    --primary-color: #0d6efd;
+    --secondary-color: #6c757d;
+    --success-color: #198754;
+    --danger-color: #dc3545;
+    --warning-color: #ffc107;
+    --info-color: #0dcaf0;
+    --light-color: #f8f9fa;
+    --dark-color: #212529;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+    line-height: 1.6;
+}
+
+.main-content {
+    min-height: calc(100vh - 200px);
+    padding: 20px 0;
+}
+
+/* Navigation */
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
+.navbar-nav .nav-link {
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.navbar-nav .nav-link:hover {
+    color: #fff !important;
+}
+
+/* Cards */
+.card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.card-header {
+    background: linear-gradient(135deg, var(--primary-color), #6f42c1);
+    color: white;
+    border-radius: 15px 15px 0 0 !important;
+    font-weight: 600;
+}
+
+/* Dashboard Cards */
+.dashboard-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 20px;
+    padding: 30px;
+    margin-bottom: 30px;
+    transition: all 0.3s ease;
+}
+
+.dashboard-card:hover {
+    transform: scale(1.05);
+}
+
+.dashboard-card .card-icon {
+    font-size: 3rem;
+    opacity: 0.8;
+    margin-bottom: 20px;
+}
+
+.dashboard-card h3 {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+/* Flight Status Cards */
+.flight-card {
+    border-left: 5px solid var(--primary-color);
+    margin-bottom: 20px;
+}
+
+.flight-status {
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.status-scheduled {
+    background-color: #e3f2fd;
+    color: #1976d2;
+}
+
+.status-boarding {
+    background-color: #e8f5e8;
+    color: #2e7d32;
+}
+
+.status-delayed {
+    background-color: #fff3e0;
+    color: #f57c00;
+}
+
+.status-landed {
+    background-color: #f3e5f5;
+    color: #7b1fa2;
+}
+
+.status-cancelled {
+    background-color: #ffebee;
+    color: #c62828;
+}
+
+/* Forms */
+.form-control {
+    border-radius: 10px;
+    border: 2px solid #e9ecef;
+    padding: 12px 15px;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.btn {
+    border-radius: 10px;
+    padding: 12px 25px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-color), #6f42c1);
+    border: none;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #0b5ed7, #5a2d91);
+    transform: translateY(-2px);
+}
+
+/* Booking Form */
+.booking-form {
+    background: white;
+    border-radius: 20px;
+    padding: 40px;
+    margin: 30px 0;
+}
+
+.seat-map {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 10px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 15px;
+    margin: 20px 0;
+}
+
+.seat {
+    width: 40px;
+    height: 40px;
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.seat.available {
+    background-color: #e3f2fd;
+    border-color: #2196f3;
+    color: #1976d2;
+}
+
+.seat.occupied {
+    background-color: #ffcdd2;
+    border-color: #f44336;
+    color: #c62828;
+    cursor: not-allowed;
+}
+
+.seat.selected {
+    background-color: #c8e6c9;
+    border-color: #4caf50;
+    color: #2e7d32;
+    transform: scale(1.1);
+}
+
+/* Boarding Pass */
+.boarding-pass {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 20px;
+    padding: 30px;
+    margin: 20px 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.boarding-pass::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100px;
+    height: 100%;
+    background: repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 10px,
+        rgba(255, 255, 255, 0.1) 10px,
+        rgba(255, 255, 255, 0.1) 20px
+    );
+}
+
+.qr-code {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    display: inline-block;
+}
+
+/* Tables */
+.table {
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.table thead th {
+    background: linear-gradient(135deg, var(--primary-color), #6f42c1);
+    color: white;
+    border: none;
+    font-weight: 600;
+    padding: 15px;
+}
+
+.table tbody td {
+    padding: 15px;
+    vertical-align: middle;
+    border-bottom: 1px solid #f8f9fa;
+}
+
+.table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+/* Alerts */
+.alert {
+    border-radius: 15px;
+    border: none;
+    padding: 20px;
+    font-weight: 500;
+}
+
+/* Loading Spinner */
+.spinner-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.spinner-border {
+    width: 3rem;
+    height: 3rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .dashboard-card {
+        margin-bottom: 20px;
+        padding: 20px;
+    }
+    
+    .dashboard-card h3 {
+        font-size: 2rem;
+    }
+    
+    .seat-map {
+        grid-template-columns: repeat(4, 1fr);
+    }
+    
+    .boarding-pass {
+        padding: 20px;
+    }
+}
+
+/* Animation Classes */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+    animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes slideIn {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(0); }
+}
+
+.slide-in {
+    animation: slideIn 0.5s ease-out;
+}
+
+/* Custom Utilities */
+.text-gradient {
+    background: linear-gradient(135deg, var(--primary-color), #6f42c1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.bg-gradient-primary {
+    background: linear-gradient(135deg, var(--primary-color), #6f42c1);
+}
+
+.shadow-custom {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+/* Footer */
+footer {
+    background: linear-gradient(135deg, #2c3e50, #3498db) !important;
+}

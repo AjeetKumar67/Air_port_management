@@ -1,0 +1,198 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }} - Airport Management System{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Search Section -->
+    <div class="card shadow-custom mb-4">
+        <div class="card-header">
+            <h5><i class="fas fa-search"></i> Search Flights</h5>
+        </div>
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">From</label>
+                    {{ search_form.source }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">To</label>
+                    {{ search_form.destination }}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Departure Date</label>
+                    {{ search_form.departure_date }}
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Airline</label>
+                    {{ search_form.airline }}
+                </div>
+                <div class="col-md-1">
+                    <label class="form-label">&nbsp;</label>
+                    <button type="submit" class="btn btn-primary form-control">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Results Section -->
+    <div class="card shadow-custom">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5><i class="fas fa-plane-departure"></i> {{ title }}</h5>
+            <span class="badge bg-primary">{{ flights|length }} flights found</span>
+        </div>
+        <div class="card-body">
+            {% if flights %}
+                <div class="row">
+                    {% for flight in flights %}
+                        <div class="col-12 mb-3">
+                            <div class="card flight-card">
+                                <div class="card-body">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-2">
+                                            <div class="text-center">
+                                                {% if flight.airline.logo %}
+                                                    <img src="{{ flight.airline.logo.url }}" alt="{{ flight.airline.name }}" width="50" height="50" class="mb-2">
+                                                {% else %}
+                                                    <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width: 50px; height: 50px;">
+                                                        <i class="fas fa-plane text-white"></i>
+                                                    </div>
+                                                {% endif %}
+                                                <div>
+                                                    <strong>{{ flight.flight_number }}</strong><br>
+                                                    <small class="text-muted">{{ flight.airline.name }}</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-6">
+                                            <div class="row">
+                                                <div class="col-4 text-center">
+                                                    <h4>{{ flight.source }}</h4>
+                                                    <div class="text-muted">
+                                                        {{ flight.scheduled_departure|time:"H:i" }}
+                                                    </div>
+                                                    <small class="text-muted">
+                                                        {{ flight.scheduled_departure|date:"M d" }}
+                                                    </small>
+                                                </div>
+                                                <div class="col-4 text-center">
+                                                    <div class="flight-duration">
+                                                        <i class="fas fa-plane text-primary"></i>
+                                                        <div class="border-top my-1"></div>
+                                                        <small class="text-muted">
+                                                            {% widthratio flight.scheduled_arrival|timeuntil:flight.scheduled_departure 60 1 %}h
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                                <div class="col-4 text-center">
+                                                    <h4>{{ flight.destination }}</h4>
+                                                    <div class="text-muted">
+                                                        {{ flight.scheduled_arrival|time:"H:i" }}
+                                                    </div>
+                                                    <small class="text-muted">
+                                                        {{ flight.scheduled_arrival|date:"M d" }}
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-2 text-center">
+                                            <span class="flight-status status-{{ flight.status }}">
+                                                {{ flight.get_status_display }}
+                                            </span>
+                                            {% if flight.gate %}
+                                                <div class="mt-2">
+                                                    <small class="text-muted">Gate:</small><br>
+                                                    <strong>{{ flight.gate.gate_number }}</strong>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <div class="col-md-2 text-center">
+                                            <div class="h4 text-primary">${{ flight.base_price }}</div>
+                                            <a href="{% url 'flights:flight_detail' flight.id %}" class="btn btn-outline-primary btn-sm">
+                                                View Details
+                                            </a>
+                                            {% if user.role == 'passenger' and flight.status == 'scheduled' %}
+                                                <a href="{% url 'bookings:booking_create' flight.id %}" class="btn btn-primary btn-sm mt-1">
+                                                    Book Now
+                                                </a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Pagination -->
+                {% if flights.has_other_pages %}
+                    <nav aria-label="Flight pagination">
+                        <ul class="pagination justify-content-center">
+                            {% if flights.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ flights.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Previous</a>
+                                </li>
+                            {% endif %}
+                            
+                            {% for num in flights.paginator.page_range %}
+                                {% if num == flights.number %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if flights.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ flights.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Next</a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-plane-slash fa-3x text-muted mb-3"></i>
+                    <h4 class="text-muted">No flights found</h4>
+                    <p class="text-muted">Try adjusting your search criteria.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.flight-duration {
+    position: relative;
+}
+
+.flight-duration .border-top {
+    width: 100%;
+    position: relative;
+}
+
+.flight-duration .border-top::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: -2px;
+    width: 0;
+    height: 0;
+    border-left: 6px solid #007bff;
+    border-top: 3px solid transparent;
+    border-bottom: 3px solid transparent;
+}
+</style>
+{% endblock %}

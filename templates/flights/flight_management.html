@@ -1,0 +1,469 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Flight Management - Airport Management System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .flight-management-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+    
+    .management-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background: rgba(255,255,255,0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 10px;
+        padding: 1.5rem;
+        text-align: center;
+        border: 1px solid rgba(255,255,255,0.2);
+    }
+    
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #FFD700;
+        margin-bottom: 0.5rem;
+    }
+    
+    .flight-actions {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+    }
+    
+    .action-btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 25px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+    }
+    
+    .btn-primary-custom {
+        background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+        color: white;
+    }
+    
+    .btn-secondary-custom {
+        background: linear-gradient(45deg, #74B9FF, #0984E3);
+        color: white;
+    }
+    
+    .btn-success-custom {
+        background: linear-gradient(45deg, #00B894, #00CEC9);
+        color: white;
+    }
+    
+    .action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        color: white;
+    }
+    
+    .flight-table {
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    .table th {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 1rem;
+    }
+    
+    .table td {
+        padding: 1rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+    
+    .status-scheduled {
+        background: #E3F2FD;
+        color: #1565C0;
+    }
+    
+    .status-delayed {
+        background: #FFF3E0;
+        color: #E65100;
+    }
+    
+    .status-boarding {
+        background: #E8F5E8;
+        color: #2E7D32;
+    }
+    
+    .status-departed {
+        background: #F3E5F5;
+        color: #7B1FA2;
+    }
+    
+    .status-cancelled {
+        background: #FFEBEE;
+        color: #C62828;
+    }
+    
+    .quick-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .quick-btn {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .quick-btn:hover {
+        transform: scale(1.1);
+    }
+    
+    .btn-edit {
+        background: #74B9FF;
+        color: white;
+    }
+    
+    .btn-delete {
+        background: #FF6B6B;
+        color: white;
+    }
+    
+    .btn-view {
+        background: #00CEC9;
+        color: white;
+    }
+    
+    .filters-section {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .filter-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        align-items: end;
+    }
+    
+    .form-group label {
+        font-weight: 500;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-control {
+        border-radius: 8px;
+        border: 2px solid #e0e0e0;
+        padding: 0.75rem;
+        transition: border-color 0.3s ease;
+    }
+    
+    .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header Card -->
+    <div class="flight-management-card">
+        <h1 class="mb-4">
+            <i class="fas fa-plane-departure me-3"></i>
+            Flight Management Dashboard
+        </h1>
+        
+        <!-- Statistics -->
+        <div class="management-stats">
+            <div class="stat-card">
+                <div class="stat-number">{{ total_flights }}</div>
+                <div>Total Flights</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ active_flights }}</div>
+                <div>Active Flights</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ delayed_flights }}</div>
+                <div>Delayed Flights</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ cancelled_flights }}</div>
+                <div>Cancelled Flights</div>
+            </div>
+        </div>
+        
+        <!-- Quick Actions -->
+        <div class="flight-actions">
+            <a href="{% url 'flights:add_flight' %}" class="action-btn btn-primary-custom">
+                <i class="fas fa-plus me-2"></i>Add New Flight
+            </a>
+            <a href="{% url 'flights:bulk_import' %}" class="action-btn btn-secondary-custom">
+                <i class="fas fa-upload me-2"></i>Bulk Import
+            </a>
+            <a href="{% url 'flights:export_flights' %}" class="action-btn btn-success-custom">
+                <i class="fas fa-download me-2"></i>Export Data
+            </a>
+        </div>
+    </div>
+    
+    <!-- Filters Section -->
+    <div class="filters-section">
+        <h5 class="mb-3">
+            <i class="fas fa-filter me-2"></i>Filter Flights
+        </h5>
+        <form method="get" id="filterForm">
+            <div class="filter-row">
+                <div class="form-group">
+                    <label for="airline">Airline</label>
+                    <select name="airline" id="airline" class="form-control">
+                        <option value="">All Airlines</option>
+                        {% for airline in airlines %}
+                            <option value="{{ airline.id }}" {% if request.GET.airline == airline.id|stringformat:"s" %}selected{% endif %}>
+                                {{ airline.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="status">Status</label>
+                    <select name="status" id="status" class="form-control">
+                        <option value="">All Statuses</option>
+                        <option value="SCHEDULED" {% if request.GET.status == 'SCHEDULED' %}selected{% endif %}>Scheduled</option>
+                        <option value="DELAYED" {% if request.GET.status == 'DELAYED' %}selected{% endif %}>Delayed</option>
+                        <option value="BOARDING" {% if request.GET.status == 'BOARDING' %}selected{% endif %}>Boarding</option>
+                        <option value="DEPARTED" {% if request.GET.status == 'DEPARTED' %}selected{% endif %}>Departed</option>
+                        <option value="CANCELLED" {% if request.GET.status == 'CANCELLED' %}selected{% endif %}>Cancelled</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="date_from">Date From</label>
+                    <input type="date" name="date_from" id="date_from" class="form-control" value="{{ request.GET.date_from }}">
+                </div>
+                <div class="form-group">
+                    <label for="date_to">Date To</label>
+                    <input type="date" name="date_to" id="date_to" class="form-control" value="{{ request.GET.date_to }}">
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="action-btn btn-primary-custom">
+                        <i class="fas fa-search me-2"></i>Filter
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+    
+    <!-- Flights Table -->
+    <div class="flight-table">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Flight Number</th>
+                    <th>Airline</th>
+                    <th>Route</th>
+                    <th>Departure</th>
+                    <th>Arrival</th>
+                    <th>Status</th>
+                    <th>Gate</th>
+                    <th>Aircraft</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for flight in flights %}
+                <tr>
+                    <td>
+                        <strong>{{ flight.flight_number }}</strong>
+                    </td>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            {% if flight.airline.logo %}
+                                <img src="{{ flight.airline.logo.url }}" alt="{{ flight.airline.name }}" 
+                                     style="width: 30px; height: 30px; object-fit: cover; border-radius: 50%; margin-right: 0.5rem;">
+                            {% endif %}
+                            {{ flight.airline.name }}
+                        </div>
+                    </td>
+                    <td>
+                        <div>
+                            <strong>{{ flight.origin }}</strong> → <strong>{{ flight.destination }}</strong>
+                        </div>
+                    </td>
+                    <td>
+                        <div>
+                            <strong>{{ flight.departure_time|date:"H:i" }}</strong>
+                            <br>
+                            <small class="text-muted">{{ flight.departure_time|date:"M d, Y" }}</small>
+                        </div>
+                    </td>
+                    <td>
+                        <div>
+                            <strong>{{ flight.arrival_time|date:"H:i" }}</strong>
+                            <br>
+                            <small class="text-muted">{{ flight.arrival_time|date:"M d, Y" }}</small>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="status-badge status-{{ flight.status|lower }}">
+                            {{ flight.get_status_display }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if flight.gate %}
+                            <strong>{{ flight.gate.gate_number }}</strong>
+                            <br>
+                            <small class="text-muted">{{ flight.gate.terminal.name }}</small>
+                        {% else %}
+                            <span class="text-muted">Not Assigned</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if flight.aircraft %}
+                            <div>
+                                <strong>{{ flight.aircraft.model }}</strong>
+                                <br>
+                                <small class="text-muted">{{ flight.aircraft.registration }}</small>
+                            </div>
+                        {% else %}
+                            <span class="text-muted">Not Assigned</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="quick-actions">
+                            <a href="{% url 'flights:flight_detail' flight.id %}" class="quick-btn btn-view" title="View Details">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="{% url 'flights:edit_flight' flight.id %}" class="quick-btn btn-edit" title="Edit Flight">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <button class="quick-btn btn-delete" title="Delete Flight" 
+                                    onclick="confirmDelete({{ flight.id }}, '{{ flight.flight_number }}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="9" class="text-center py-5">
+                        <div class="text-muted">
+                            <i class="fas fa-plane fa-3x mb-3"></i>
+                            <h5>No flights found</h5>
+                            <p>No flights match your current filters.</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Pagination -->
+    {% if flights.has_other_pages %}
+    <nav aria-label="Flight pagination" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if flights.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}">First</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ flights.previous_page_number }}{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}">Previous</a>
+                </li>
+            {% endif %}
+            
+            <li class="page-item active">
+                <span class="page-link">{{ flights.number }} of {{ flights.paginator.num_pages }}</span>
+            </li>
+            
+            {% if flights.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ flights.next_page_number }}{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}">Next</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ flights.paginator.num_pages }}{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}">Last</a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete flight <strong id="flightToDelete"></strong>?</p>
+                <p class="text-danger">This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="post" id="deleteForm" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Delete Flight</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function confirmDelete(flightId, flightNumber) {
+    document.getElementById('flightToDelete').textContent = flightNumber;
+    document.getElementById('deleteForm').action = `/flights/${flightId}/delete/`;
+    new bootstrap.Modal(document.getElementById('deleteModal')).show();
+}
+
+// Auto-submit form when filters change
+document.addEventListener('DOMContentLoaded', function() {
+    const filterInputs = document.querySelectorAll('#filterForm select, #filterForm input');
+    filterInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            if (this.type !== 'submit') {
+                document.getElementById('filterForm').submit();
+            }
+        });
+    });
+});
+</script>
+{% endblock %}
